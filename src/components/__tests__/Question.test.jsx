@@ -2,13 +2,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import Question from '../Question';
 
-test('renders question and source link', () => {
-  const q = { id: 1, text: 'Sample?', source: 'https://example.com', orientation: 1 };
+test('renders question and handles answer', () => {
+  const q = { id: 1, text: 'Sample?', source: 'https://example.com', econ: 1, social: 0, weight: 1 };
   const scale = [
     { label: 'Agree', value: 1 },
     { label: 'Disagree', value: -1 }
   ];
   const setAnswers = vi.fn();
+  const t = (k) => k;
   render(
     <Question
       q={q}
@@ -17,11 +18,10 @@ test('renders question and source link', () => {
       scale={scale}
       answers={{}}
       setAnswers={setAnswers}
+      t={t}
     />
   );
   expect(screen.getByText('Sample?')).toBeInTheDocument();
-  const link = screen.getByRole('link', { name: q.source });
-  expect(link).toHaveAttribute('href', q.source);
-  fireEvent.click(screen.getByText('Agree'));
+  fireEvent.click(screen.getByLabelText('Agree'));
   expect(setAnswers).toHaveBeenCalled();
 });

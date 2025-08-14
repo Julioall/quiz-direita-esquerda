@@ -1,15 +1,19 @@
-import { useState } from "react";
-import { questionBank } from "./questions";
+import { useEffect, useState } from "react";
 import Card from "./components/Card";
 import PositionList from "./components/PositionList";
 import Question from "./components/Question";
-
+import ResultChart from "./components/ResultChart";
+import ResultPanel from "./components/ResultPanel";
+import { loadQuestions } from "./loadQuestions";
+import { score } from "./scoring";
+import { t as translate, defaultLang } from "./i18n";
+import { downloadCSV } from "./utils/csv";
 
 export default function App() {
-  // --- Config ---
-  const QUESTION_COUNT = 12; // quantas perguntas por tentativa
+  const QUESTION_COUNT = 12;
+  const [lang] = useState(defaultLang);
+  const t = (key) => translate(lang, key);
 
-  // Lista de posicionamentos para exibição didática
   const leftPositions = [
     "Impostos progressivos e maior taxação sobre altas rendas",
     "Ampliação de programas sociais e do papel do Estado no bem‑estar",
@@ -31,86 +35,64 @@ export default function App() {
     "Ênfase em valores tradicionais e segurança pública"
   ];
 
-  // Banco de perguntas importado de src/questions.js. orientation: +1 se concordar puxa à DIREITA; -1 se puxa à ESQUERDA
-
-  // --- Estado da aplicação ---
   const [step, setStep] = useState("home");
+  const [allQuestions, setAllQuestions] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
 
-  // Inicia quiz com amostragem aleatória
+  useEffect(() => {
+    loadQuestions().then(setAllQuestions);
+  }, []);
+
   function startQuiz() {
-    const shuffled = [...questionBank].sort(() => Math.random() - 0.5);
+    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
     const picked = shuffled.slice(0, QUESTION_COUNT);
     setQuestions(picked);
     setAnswers({});
     setStep("quiz");
   }
 
-  // Mapeia opções Likert
-  const scale = [
-    { label: "Discordo totalmente", value: -2 },
-    { label: "Discordo", value: -1 },
-    { label: "Neutro", value: 0 },
-    { label: "Concordo", value: +1 },
-    { label: "Concordo totalmente", value: +2 },
-  ];
-
-  function scoreResult() {
-    const vals = Object.entries(answers);
-    if (vals.length === 0) return { raw: 0, avg: 0, label: "Centro" };
-    let sum = 0;
-    vals.forEach(([id, ans]) => {
-      const q = questions.find(q => q.id === Number(id));
-      if (!q) return;
-      sum += ans * q.orientation;
-    });
-    const avg = sum / vals.length;
-    let label = "Centro";
-    if (avg <= -0.7) label = "Esquerda";
-    else if (avg >= 0.7) label = "Direita";
-    return { raw: sum, avg, label };
-  }
-
   function finish() {
+    const res = score(answers, questions);
+    setResult(res);
     setStep("result");
   }
 
-  const result = scoreResult();
   const allAnswered = questions.length > 0 && Object.keys(answers).length === questions.length;
+  const scale = [-2,-1,0,1,2].map(v => ({ value:v, label:t(`scale.${v}`) }));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 dark:from-zinc-950 dark:to-zinc-900 text-zinc-900 dark:text-zinc-100">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <header className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">Quiz: Direita x Esquerda</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Este site lista posicionamentos típicos e, ao final do quiz, estima sua aproximação: Esquerda, Centro ou Direita. Não é teste científico.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{t('description')}</p>
         </header>
 
         {step === "home" && (
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <PositionList title="Posicionamentos normalmente associados à ESQUERDA" items={leftPositions} />
-            <PositionList title="Posicionamentos normalmente associados à DIREITA" items={rightPositions} />
-          </div>
-        )}
-
-        {step === "home" && (
-          <Card>
-            <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Iniciar quiz</h2>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">{QUESTION_COUNT} perguntas aleatórias por tentativa.</p>
-              </div>
-              <button onClick={startQuiz} className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">Começar</button>
+          <>
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <PositionList title="Posicionamentos normalmente associados à ESQUERDA" items={leftPositions} />
+              <PositionList title="Posicionamentos normalmente associados à DIREITA" items={rightPositions} />
             </div>
-          </Card>
+            <Card>
+              <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold">{t('start')}</h2>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{QUESTION_COUNT} perguntas aleatórias por tentativa.</p>
+                </div>
+                <button type="button" onClick={startQuiz} disabled={allQuestions.length===0} className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">{t('start')}</button>
+              </div>
+            </Card>
+          </>
         )}
 
         {step === "quiz" && (
           <>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold">Responda</h2>
-              <button onClick={() => setStep("home")} className="text-sm underline">Voltar</button>
+              <button type="button" onClick={() => setStep("home")} className="text-sm underline">{t('back')}</button>
             </div>
             {questions.map((q, i) => (
               <Question
@@ -121,53 +103,28 @@ export default function App() {
                 scale={scale}
                 answers={answers}
                 setAnswers={setAnswers}
+                t={t}
               />
             ))}
             <div className="flex items-center justify-end gap-3 mt-4">
-              <button onClick={() => setStep("home")} className="px-4 py-2 rounded-xl border">Cancelar</button>
-              <button disabled={!allAnswered} onClick={finish} className={`px-4 py-2 rounded-xl text-white ${allAnswered ? "bg-green-600 hover:bg-green-700" : "bg-zinc-400 cursor-not-allowed"}`}>Finalizar</button>
+              <button type="button" onClick={() => setStep("home")} className="px-4 py-2 rounded-xl border">{t('cancel')}</button>
+              <button type="button" disabled={!allAnswered} onClick={finish} className={`px-4 py-2 rounded-xl text-white ${allAnswered ? "bg-green-600 hover:bg-green-700" : "bg-zinc-400 cursor-not-allowed"}`}>{t('finish')}</button>
             </div>
           </>
         )}
 
-        {step === "result" && (
+        {step === "result" && result && (
           <Card>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-semibold">Resultado</h2>
-              <button onClick={startQuiz} className="text-sm underline">Tentar novamente</button>
+              <h2 className="text-xl font-semibold">{t('result')}</h2>
+              <button type="button" onClick={startQuiz} className="text-sm underline">{t('tryAgain')}</button>
             </div>
-            <div className="grid sm:grid-cols-3 gap-4 items-stretch">
-              <div className="sm:col-span-2">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Média ponderada das respostas (intervalo aproximado −2 a +2):</p>
-                <div className="mt-3 h-3 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="relative h-full">
-                    <div className="absolute inset-0 flex">
-                      <div className="w-1/2 bg-gradient-to-r from-rose-300/60 to-transparent" />
-                      <div className="w-1/2 bg-gradient-to-l from-sky-300/60 to-transparent" />
-                    </div>
-                    <div className="absolute -top-1 h-5 w-0.5 bg-zinc-900 dark:bg-zinc-100 left-1/2" />
-                    <div
-                      className="absolute top-0 h-3 bg-emerald-500"
-                      style={{
-                        width: "8px",
-                        left: `calc(50% + ${(result.avg / 2) * 100}% - 4px)`
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-between text-xs mt-1">
-                  <span>Esq.</span>
-                  <span>Centro</span>
-                  <span>Dir.</span>
-                </div>
-              </div>
-              <div className="flex flex-col justify-center items-center bg-white dark:bg-zinc-950 rounded-xl border p-4">
-                <div className="text-xs text-zinc-500">Classificação</div>
-                <div className="text-2xl font-bold mt-1">{result.label}</div>
-                <div className="text-xs text-zinc-500 mt-1">média {result.avg.toFixed(2)}</div>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <ResultChart econ={result.econ} social={result.social} />
+              <ResultPanel result={result} />
             </div>
-            <p className="text-xs text-zinc-500 mt-4">Aviso: este quiz é simplificado e serve apenas como autoavaliação lúdica. Respostas podem variar por contexto e interpretação.</p>
+            <button type="button" onClick={() => downloadCSV(answers, questions, result)} className="mt-4 px-4 py-2 rounded-xl border">{t('download')}</button>
+            <p className="text-xs text-zinc-500 mt-4">Aviso: este quiz é simplificado e serve apenas como autoavaliação lúdica.</p>
           </Card>
         )}
 
