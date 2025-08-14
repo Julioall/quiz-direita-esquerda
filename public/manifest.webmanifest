@@ -1,0 +1,13 @@
+{
+  "name": "Quiz Direita Esquerda",
+  "short_name": "Quiz",
+  "start_url": "/quiz-direita-esquerda/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "4538598.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
