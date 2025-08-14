@@ -1,18 +1,12 @@
-# Quiz Direita x Esquerda
+# React + Vite
 
-Aplicação web em React que lista posicionamentos políticos comumente associados à esquerda e à direita e aplica um quiz para estimar a inclinação política do usuário entre Esquerda, Centro ou Direita. As perguntas são selecionadas aleatoriamente e a classificação é feita com base em uma escala de concordância/discordância.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Recursos
-- Lista comparativa de posicionamentos
-- Quiz com perguntas aleatórias
-- Escala Likert de 5 pontos
-- Resultado visual com média ponderada
-- Totalmente client-side, sem coleta de dados
+Currently, two official plugins are available:
 
-## Tecnologias
-- React
-- Tailwind CSS
-- Vite
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Aviso
-Este quiz é lúdico e não possui validade científica.
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
