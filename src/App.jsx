@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { questionBank } from "./questions";
 
 
 export default function App() {
@@ -27,33 +28,7 @@ export default function App() {
     "Ênfase em valores tradicionais e segurança pública"
   ];
 
-  // Banco de perguntas. orientation: +1 se concordar puxa à DIREITA; -1 se puxa à ESQUERDA
-  const questionBank = [
-    { id: 1, text: "O Estado deve ser o principal provedor de serviços essenciais (saúde, educação).", orientation: -1 },
-    { id: 2, text: "Privatizações são, em geral, o melhor caminho para melhorar a eficiência de serviços.", orientation: +1 },
-    { id: 3, text: "Leis trabalhistas devem ser flexibilizadas para facilitar contratações.", orientation: +1 },
-    { id: 4, text: "Programas de transferência de renda devem ser ampliados mesmo com aumento de impostos.", orientation: -1 },
-    { id: 5, text: "Cotas e políticas afirmativas são necessárias para corrigir desigualdades históricas.", orientation: -1 },
-    { id: 6, text: "O porte de armas pelo cidadão comum aumenta a segurança.", orientation: +1 },
-    { id: 7, text: "A proteção ambiental deve limitar projetos econômicos quando houver risco significativo.", orientation: -1 },
-    { id: 8, text: "Menos impostos em geral geram mais crescimento mesmo com menos Estado.", orientation: +1 },
-    { id: 9, text: "O casamento igualitário e direitos LGBT+ devem ser garantidos por lei.", orientation: -1 },
-    { id: 10, text: "A escola deve focar conteúdos tradicionais e evitar temas políticos e sociais em sala.", orientation: +1 },
-    { id: 11, text: "Tributação sobre grandes fortunas é desejável para financiar serviços públicos.", orientation: -1 },
-    { id: 12, text: "Empresas devem ter menos burocracia mesmo que alguma proteção ao trabalhador diminua.", orientation: +1 },
-    { id: 13, text: "Povos indígenas devem ter prioridade na demarcação e proteção de terras.", orientation: -1 },
-    { id: 14, text: "A redução do papel do Estado é positiva na maioria dos setores.", orientation: +1 },
-    { id: 15, text: "Descriminalizar o uso de drogas é melhor que endurecer punições.", orientation: -1 },
-    { id: 16, text: "A punição mais dura é o caminho principal para reduzir a criminalidade.", orientation: +1 },
-    { id: 17, text: "Subsídios estatais para setores estratégicos são importantes para o desenvolvimento.", orientation: -1 },
-    { id: 18, text: "Livre mercado aloca recursos melhor do que o governo na maioria dos casos.", orientation: +1 },
-    { id: 19, text: "Imigrantes devem ter facilidades para viver e trabalhar no país.", orientation: -1 },
-    { id: 20, text: "Valores tradicionais devem orientar políticas públicas.", orientation: +1 },
-    { id: 21, text: "Greves e sindicatos são ferramentas importantes de equilíbrio nas relações de trabalho.", orientation: -1 },
-    { id: 22, text: "Reduzir benefícios sociais incentiva as pessoas a buscarem emprego.", orientation: +1 },
-    { id: 23, text: "O Estado deve regular fortemente bancos e grandes empresas para evitar abusos.", orientation: -1 },
-    { id: 24, text: "Empreender deve ser o mais simples possível, mesmo que isso reduza certas exigências.", orientation: +1 },
-  ];
+  // Banco de perguntas importado de src/questions.js. orientation: +1 se concordar puxa à DIREITA; -1 se puxa à ESQUERDA
 
   // --- Estado da aplicação ---
   const [step, setStep] = useState("home");
